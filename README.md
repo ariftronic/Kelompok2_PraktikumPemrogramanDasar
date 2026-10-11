@@ -1,2 +1,6 @@
-# Proyek1_Kelompok2_PraktikumPemrogramanDasar
-Untuk Pemenuhan tugas Proyek 1
+# Kelompok 2 - Praktikum Pemrograman Dasar
+
+Repositori untuk penugasan proyek Praktikum Pemrograman Dasar - Kelompok 2.
+
+## Daftar Proyek
+- **[Proyek 1 - Sistem Peminjaman Lab](./Proyek1-Peminjaman-Lab)**: Sistem manajemen peminjaman alat laboratorium berbasis Python.
