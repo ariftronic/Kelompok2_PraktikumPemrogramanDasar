@@ -1,3 +1,10 @@
+from modules.konstanta import (
+    STATUS_DIPINJAM,
+    STATUS_SEBAGIAN,
+    STATUS_SELESAI,
+)
+
+
 class StatistikPeminjaman:
     def __init__(self, sistem):
         self.sistem = sistem
@@ -59,7 +66,7 @@ class StatistikPeminjaman:
         jumlah = 0
 
         for trx in self.sistem.transaksi.values():
-            if trx.status == "selesai":
+            if trx.status == STATUS_SELESAI:
                 jumlah = jumlah + 1
 
         return jumlah
@@ -68,7 +75,7 @@ class StatistikPeminjaman:
         jumlah = 0
 
         for trx in self.sistem.transaksi.values():
-            if trx.status == "dipinjam" or trx.status == "sebagian dikembalikan":
+            if trx.status == STATUS_DIPINJAM or trx.status == STATUS_SEBAGIAN:
                 jumlah = jumlah + 1
 
         return jumlah
@@ -83,19 +90,23 @@ class StatistikPeminjaman:
             print("Alat paling sering dipinjam      : Belum ada data")
         else:
             print(
-                "Alat paling sering dipinjam      :",
-                alat.nama_alat,
-                "(", jumlah_alat, "kali )"
+                f"Alat paling sering dipinjam      : "
+                f"{alat.nama_alat} ({jumlah_alat} kali)"
             )
 
         if mahasiswa is None:
             print("Mahasiswa paling sering meminjam : Belum ada data")
         else:
             print(
-                "Mahasiswa paling sering meminjam :",
-                mahasiswa.nama,
-                "(", jumlah_mahasiswa, "transaksi )"
+                f"Mahasiswa paling sering meminjam : "
+                f"{mahasiswa.nama} ({jumlah_mahasiswa} transaksi)"
             )
 
-        print("Jumlah transaksi selesai         :", self.jumlah_transaksi_selesai())
-        print("Jumlah transaksi aktif           :", self.jumlah_transaksi_aktif())
+        print(
+            f"Jumlah transaksi selesai         : "
+            f"{self.jumlah_transaksi_selesai()}"
+        )
+        print(
+            f"Jumlah transaksi aktif           : "
+            f"{self.jumlah_transaksi_aktif()}"
+        )

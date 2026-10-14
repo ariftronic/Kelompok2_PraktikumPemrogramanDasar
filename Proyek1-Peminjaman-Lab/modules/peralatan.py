@@ -1,4 +1,4 @@
-KONDISI_ALAT = ("baik", "rusak ringan", "rusak berat")
+from modules.konstanta import KONDISI_ALAT
 
 
 class Peralatan:
@@ -8,12 +8,13 @@ class Peralatan:
         self.kategori = str(kategori).strip()
         self.kondisi = "baik"
         self.tersedia = True
+        self.aktif = True
 
     def update_data(self, nama_alat, kategori):
         nama_alat = str(nama_alat).strip()
         kategori = str(kategori).strip()
 
-        if nama_alat == "":
+        if nama_alat == "" or kategori == "":
             return False
 
         self.nama_alat = nama_alat
@@ -21,7 +22,7 @@ class Peralatan:
         return True
 
     def dapat_dipinjam(self):
-        if self.tersedia and self.kondisi == "baik":
+        if self.aktif and self.tersedia and self.kondisi == "baik":
             return True
         else:
             return False
@@ -48,13 +49,32 @@ class Peralatan:
 
         return True
 
+    def perbaiki(self):
+        if not self.aktif:
+            return False
+
+        if self.kondisi == "baik":
+            return False
+
+        self.kondisi = "baik"
+        self.tersedia = True
+        return True
+
+    def nonaktifkan(self):
+        self.aktif = False
+        self.tersedia = False
+        return True
+
     def cocok_pencarian(self, keyword):
         keyword = str(keyword).strip().lower()
+
+        if not self.aktif:
+            return False
 
         if keyword == "":
             return True
 
-        if keyword == self.kode_alat.lower():
+        if keyword in self.kode_alat.lower():
             return True
 
         if keyword in self.nama_alat.lower():
@@ -66,10 +86,10 @@ class Peralatan:
         return False
 
     def tampilkan_info(self):
-        print("Kode      :", self.kode_alat)
-        print("Nama      :", self.nama_alat)
-        print("Kategori  :", self.kategori)
-        print("Kondisi   :", self.kondisi)
+        print(f"Kode      : {self.kode_alat}")
+        print(f"Nama      : {self.nama_alat}")
+        print(f"Kategori  : {self.kategori}")
+        print(f"Kondisi   : {self.kondisi}")
 
         if self.tersedia:
             print("Status    : Tersedia")
