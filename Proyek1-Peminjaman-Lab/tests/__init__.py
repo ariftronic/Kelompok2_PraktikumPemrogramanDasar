@@ -1,0 +1,1 @@
+# Package tests berisi pengujian sederhana tanpa framework tambahan.
