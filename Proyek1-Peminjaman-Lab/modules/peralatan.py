@@ -1,3 +1,6 @@
+KONDISI_ALAT = ("baik", "rusak ringan", "rusak berat")
+
+
 class Peralatan:
     def __init__(self, kode_alat, nama_alat, kategori):
         self.kode_alat = str(kode_alat).strip()
@@ -5,8 +8,6 @@ class Peralatan:
         self.kategori = str(kategori).strip()
         self.kondisi = "baik"
         self.tersedia = True
-        self.kode = self.kode_alat
-        self.nama = self.nama_alat
 
     def update_data(self, nama_alat, kategori):
         nama_alat = str(nama_alat).strip()
@@ -17,8 +18,6 @@ class Peralatan:
 
         self.nama_alat = nama_alat
         self.kategori = kategori
-
-        self.nama = self.nama_alat
         return True
 
     def dapat_dipinjam(self):
@@ -37,12 +36,11 @@ class Peralatan:
     def proses_pengembalian(self, kondisi):
         kondisi = str(kondisi).strip().lower()
 
-        if kondisi not in ["baik", "rusak ringan", "rusak berat"]:
+        if kondisi not in KONDISI_ALAT:
             return False
 
         self.kondisi = kondisi
 
-        # Hanya alat yang kembali dalam kondisi baik yang tersedia lagi.
         if kondisi == "baik":
             self.tersedia = True
         else:
@@ -53,8 +51,9 @@ class Peralatan:
     def cocok_pencarian(self, keyword):
         keyword = str(keyword).strip().lower()
 
-        # Disamakan dengan aturan pencarian Faris:
-        # kode harus sama, nama/kategori boleh sebagian.
+        if keyword == "":
+            return True
+
         if keyword == self.kode_alat.lower():
             return True
 
@@ -67,8 +66,12 @@ class Peralatan:
         return False
 
     def tampilkan_info(self):
-        print("Kode       :", self.kode_alat)
-        print("Nama       :", self.nama_alat)
-        print("Kategori   :", self.kategori)
-        print("Kondisi    :", self.kondisi)
-        print("Tersedia   :", self.tersedia)
+        print("Kode      :", self.kode_alat)
+        print("Nama      :", self.nama_alat)
+        print("Kategori  :", self.kategori)
+        print("Kondisi   :", self.kondisi)
+
+        if self.tersedia:
+            print("Status    : Tersedia")
+        else:
+            print("Status    : Tidak tersedia")
