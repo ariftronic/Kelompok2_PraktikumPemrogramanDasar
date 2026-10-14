@@ -1,9 +1,11 @@
-from datetime import timedelta
+from datetime import date
 
-STATUS_DIPINJAM = "dipinjam"
-STATUS_SEBAGIAN = "sebagian dikembalikan"
-STATUS_SELESAI = "selesai"
-MAKS_HARI_PINJAM = 7
+from modules.konstanta import (
+    KONDISI_ALAT,
+    STATUS_DIPINJAM,
+    STATUS_SEBAGIAN,
+    STATUS_SELESAI,
+)
 
 
 class ItemPeminjaman:
@@ -24,7 +26,8 @@ class ItemPeminjaman:
             return False, "Alat sudah dikembalikan sebelumnya."
 
         kondisi = str(kondisi).strip().lower()
-        if kondisi not in ("baik", "rusak ringan", "rusak berat"):
+
+        if kondisi not in KONDISI_ALAT:
             return False, "Kondisi alat tidak valid."
 
         self.sudah_dikembalikan = True
@@ -32,19 +35,43 @@ class ItemPeminjaman:
         self.kondisi_kembali = kondisi
         return True, "Pengembalian item berhasil."
 
+    def terlambat(self, batas_kembali, tanggal_acuan=None):
+        if self.sudah_dikembalikan:
+            tanggal_dibandingkan = self.tanggal_kembali
+        else:
+            if tanggal_acuan is None:
+                tanggal_dibandingkan = date.today()
+            else:
+                tanggal_dibandingkan = tanggal_acuan
+
+        if tanggal_dibandingkan > batas_kembali:
+            return True
+        else:
+            return False
+
+    def jumlah_hari_terlambat(self, batas_kembali, tanggal_acuan=None):
+        if not self.terlambat(batas_kembali, tanggal_acuan):
+            return 0
+
+        if self.sudah_dikembalikan:
+            tanggal_dibandingkan = self.tanggal_kembali
+        else:
+            if tanggal_acuan is None:
+                tanggal_dibandingkan = date.today()
+            else:
+                tanggal_dibandingkan = tanggal_acuan
+
+        selisih = tanggal_dibandingkan - batas_kembali
+        return selisih.days
+
 
 class TransaksiPeminjaman:
-    def __init__(self, id_transaksi, mahasiswa, daftar_alat, tanggal_pinjam, batas_kembali=None):
+    def __init__(self, id_transaksi, mahasiswa, daftar_alat, tanggal_pinjam, batas_kembali):
         self.id_transaksi = str(id_transaksi).strip()
         self.mahasiswa = mahasiswa
         self.daftar_item = []
         self.tanggal_pinjam = tanggal_pinjam
-
-        if batas_kembali is None:
-            self.batas_kembali = tanggal_pinjam + timedelta(days=MAKS_HARI_PINJAM)
-        else:
-            self.batas_kembali = batas_kembali
-
+        self.batas_kembali = batas_kembali
         self.status = STATUS_DIPINJAM
 
         for alat in daftar_alat:
@@ -112,10 +139,12 @@ class TransaksiPeminjaman:
             return False, "Tanggal pengembalian tidak boleh sebelum tanggal peminjaman.", None
 
         item = self.cari_item(kode_alat)
+
         if item is None:
             return False, "Alat tidak ada pada transaksi ini.", None
 
         berhasil, pesan = item.kembalikan(kondisi, tanggal)
+
         if not berhasil:
             return False, pesan, item
 
@@ -123,23 +152,31 @@ class TransaksiPeminjaman:
         return True, "Alat berhasil dikembalikan.", item
 
     def tampilkan_detail(self):
-        print("ID Transaksi   :", self.id_transaksi)
-        print("Mahasiswa      :", self.mahasiswa.nama, "(", self.mahasiswa.nim, ")")
-        print("Tanggal pinjam :", self.tanggal_pinjam)
-        print("Batas kembali  :", self.batas_kembali)
-        print("Status          :", self.status)
+        print(f"ID Transaksi   : {self.id_transaksi}")
+        print(f"Mahasiswa      : {self.mahasiswa.nama} ({self.mahasiswa.nim})")
+        print(f"Tanggal pinjam : {self.tanggal_pinjam}")
+        print(f"Batas kembali  : {self.batas_kembali}")
+        print(f"Status         : {self.status}")
         print("Daftar alat:")
 
         nomor = 1
+
         for item in self.daftar_item:
             if item.sudah_dikembalikan:
-                status_item = "Sudah kembali - " + str(item.kondisi_kembali)
+                status_item = (
+                    f"Sudah kembali {item.tanggal_kembali} - "
+                    f"{item.kondisi_kembali}"
+                )
             else:
                 status_item = "Masih dipinjam"
 
+            hari_terlambat = item.jumlah_hari_terlambat(self.batas_kembali)
+
+            if hari_terlambat > 0:
+                status_item = status_item + f" | TERLAMBAT {hari_terlambat} hari"
+
             print(
-                " ", nomor, ".",
-                item.alat.kode_alat, "-", item.alat.nama_alat,
-                "|", status_item
+                f"  {nomor}. {item.alat.kode_alat} - "
+                f"{item.alat.nama_alat} | {status_item}"
             )
             nomor = nomor + 1
