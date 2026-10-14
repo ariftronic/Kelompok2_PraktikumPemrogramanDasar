@@ -1,6 +1,11 @@
 # Kelompok 2 - Praktikum Pemrograman Dasar
 
-Repositori untuk penugasan proyek Praktikum Pemrograman Dasar - Kelompok 2.
+Repository bersama Kelompok 2 untuk rangkaian proyek Praktikum Pemrograman Dasar.
 
 ## Daftar Proyek
-- **[Proyek 1 - Sistem Peminjaman Lab](./Proyek1-Peminjaman-Lab)**: Sistem manajemen peminjaman alat laboratorium berbasis Python.
+
+- [Proyek 1 - Sistem Peminjaman Peralatan Laboratorium](./Proyek1-Peminjaman-Lab) - sedang dikembangkan.
+- Proyek 2 - ditambahkan pada folder tersendiri saat instruksi proyek tersedia.
+- Proyek 3 - ditambahkan pada folder tersendiri saat instruksi proyek tersedia.
+
+Setiap proyek memiliki README, source code, pengujian, dan dokumentasi masing-masing.
