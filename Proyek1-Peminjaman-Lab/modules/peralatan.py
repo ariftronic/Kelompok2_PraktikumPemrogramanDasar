@@ -8,7 +8,6 @@ class Peralatan:
         self.kategori = str(kategori).strip()
         self.kondisi = "baik"
         self.tersedia = True
-        self.aktif = True
 
     def update_data(self, nama_alat, kategori):
         nama_alat = str(nama_alat).strip()
@@ -22,7 +21,7 @@ class Peralatan:
         return True
 
     def dapat_dipinjam(self):
-        if self.aktif and self.tersedia and self.kondisi == "baik":
+        if self.tersedia and self.kondisi == "baik":
             return True
         else:
             return False
@@ -49,27 +48,8 @@ class Peralatan:
 
         return True
 
-    def perbaiki(self):
-        if not self.aktif:
-            return False
-
-        if self.kondisi == "baik":
-            return False
-
-        self.kondisi = "baik"
-        self.tersedia = True
-        return True
-
-    def nonaktifkan(self):
-        self.aktif = False
-        self.tersedia = False
-        return True
-
     def cocok_pencarian(self, keyword):
         keyword = str(keyword).strip().lower()
-
-        if not self.aktif:
-            return False
 
         if keyword == "":
             return True

@@ -50,7 +50,7 @@ def menu_mahasiswa(sistem):
         print("\n===== KELOLA DATA MAHASISWA =====")
         print("1. Tambah mahasiswa")
         print("2. Edit mahasiswa")
-        print("3. Hapus/nonaktifkan mahasiswa")
+        print("3. Hapus mahasiswa")
         print("4. Cari mahasiswa")
         print("5. Tampilkan semua mahasiswa")
         print("0. Kembali")
@@ -67,7 +67,7 @@ def menu_mahasiswa(sistem):
         elif pilihan == "2":
             nim = input("NIM mahasiswa yang diedit: ").strip()
 
-            if nim not in sistem.mahasiswa or not sistem.mahasiswa[nim].aktif:
+            if nim not in sistem.mahasiswa:
                 print("Mahasiswa tidak ditemukan.")
                 continue
 
@@ -78,7 +78,7 @@ def menu_mahasiswa(sistem):
             print(pesan)
 
         elif pilihan == "3":
-            nim = input("NIM mahasiswa yang dinonaktifkan: ")
+            nim = input("NIM mahasiswa yang dihapus: ")
             berhasil, pesan = sistem.hapus_mahasiswa(nim)
             print(pesan)
 
@@ -101,10 +101,9 @@ def menu_alat(sistem):
         print("\n===== KELOLA DATA ALAT =====")
         print("1. Tambah alat")
         print("2. Edit alat")
-        print("3. Hapus/nonaktifkan alat")
+        print("3. Hapus alat")
         print("4. Cari alat")
         print("5. Tampilkan semua alat")
-        print("6. Perbaiki alat rusak")
         print("0. Kembali")
 
         pilihan = input("Pilih menu: ").strip()
@@ -119,7 +118,7 @@ def menu_alat(sistem):
         elif pilihan == "2":
             kode = input("Kode alat yang diedit: ").strip()
 
-            if kode not in sistem.peralatan or not sistem.peralatan[kode].aktif:
+            if kode not in sistem.peralatan:
                 print("Peralatan tidak ditemukan.")
                 continue
 
@@ -130,7 +129,7 @@ def menu_alat(sistem):
             print(pesan)
 
         elif pilihan == "3":
-            kode = input("Kode alat yang dinonaktifkan: ")
+            kode = input("Kode alat yang dihapus: ")
             berhasil, pesan = sistem.hapus_alat(kode)
             print(pesan)
 
@@ -140,11 +139,6 @@ def menu_alat(sistem):
 
         elif pilihan == "5":
             tampilkan_alat(sistem.cari_alat(""))
-
-        elif pilihan == "6":
-            kode = input("Kode alat yang sudah selesai diperbaiki: ")
-            berhasil, pesan = sistem.perbaiki_alat(kode)
-            print(pesan)
 
         elif pilihan == "0":
             break
@@ -157,7 +151,7 @@ def buat_transaksi(sistem):
     print("\n===== BUAT TRANSAKSI PEMINJAMAN =====")
     nim = input("NIM mahasiswa: ").strip()
 
-    if nim not in sistem.mahasiswa or not sistem.mahasiswa[nim].aktif:
+    if nim not in sistem.mahasiswa:
         print("Mahasiswa tidak ditemukan.")
         return
 
@@ -183,7 +177,7 @@ def buat_transaksi(sistem):
             print("Kode alat sudah dipilih.")
             continue
 
-        if kode not in sistem.peralatan or not sistem.peralatan[kode].aktif:
+        if kode not in sistem.peralatan:
             print("Alat tidak ditemukan.")
             continue
 
@@ -249,7 +243,9 @@ def proses_pengembalian(sistem):
         if not trx.aktif():
             break
 
-        lanjut = input("Kembalikan alat lain dari transaksi ini? (y/n): ").strip().lower()
+        lanjut = input(
+            "Kembalikan alat lain dari transaksi ini? (y/n): "
+        ).strip().lower()
 
         if lanjut != "y":
             break
@@ -269,7 +265,7 @@ def main():
         print("3.  Buat transaksi peminjaman")
         print("4.  Tampilkan transaksi")
         print("5.  Proses pengembalian alat")
-        print("6.  Cari transaksi aktif berdasarkan mahasiswa")
+        print("6.  Cari transaksi berdasarkan mahasiswa")
         print("7.  Tampilkan alat yang tersedia")
         print("8.  Tampilkan alat yang sedang dipinjam")
         print("9.  Tampilkan alat yang rusak")
@@ -296,11 +292,7 @@ def main():
 
         elif pilihan == "6":
             nim = input("Masukkan NIM mahasiswa: ").strip()
-
-            if nim not in sistem.mahasiswa:
-                print("Mahasiswa tidak ditemukan.")
-            else:
-                tampilkan_transaksi(sistem.cari_transaksi_mahasiswa(nim))
+            tampilkan_transaksi(sistem.cari_transaksi_mahasiswa(nim))
 
         elif pilihan == "7":
             tampilkan_alat(sistem.alat_tersedia())
@@ -313,11 +305,7 @@ def main():
 
         elif pilihan == "10":
             nim = input("Masukkan NIM mahasiswa: ").strip()
-
-            if nim not in sistem.mahasiswa:
-                print("Mahasiswa tidak ditemukan.")
-            else:
-                tampilkan_transaksi(sistem.riwayat_peminjaman(nim))
+            tampilkan_transaksi(sistem.riwayat_peminjaman(nim))
 
         elif pilihan == "11":
             statistik.tampilkan_statistik()

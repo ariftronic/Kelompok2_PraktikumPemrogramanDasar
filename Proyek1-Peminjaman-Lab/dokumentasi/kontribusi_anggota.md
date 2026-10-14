@@ -2,9 +2,9 @@
 
 | Anggota | Kontribusi Utama |
 |---|---|
-| Muhammad Nur Arif | Class Mahasiswa, validasi transaksi aktif, CRUD mahasiswa, pengujian mahasiswa, dokumentasi |
-| Fatimah Az Zahra (Rara) | Class Peralatan, CRUD alat, kondisi/ketersediaan, pencarian fleksibel, pengujian alat |
-| Niken Syafira Zulfaida | ItemPeminjaman, TransaksiPeminjaman, status transaksi, pengembalian per item, pengujian transaksi |
-| Faris Rafiuddin Hannan | SistemLaboratorium, integrasi, pengembalian, StatistikPeminjaman, main.py, pengujian integrasi |
+| Muhammad Nur Arif | Class Mahasiswa, CRUD mahasiswa, validasi transaksi aktif, testing mahasiswa, dokumentasi |
+| Fatimah Az Zahra (Rara) | Class Peralatan, CRUD alat, kondisi/ketersediaan, pencarian fleksibel, testing alat |
+| Niken Syafira Zulfaida | ItemPeminjaman, TransaksiPeminjaman, status transaksi, pengembalian per item, testing transaksi |
+| Faris Rafiuddin Hannan | SistemLaboratorium, integrasi program, pengembalian, StatistikPeminjaman, main.py, testing integrasi |
 
 Histori commit dan Pull Request GitHub digunakan sebagai bukti kontribusi masing-masing anggota.

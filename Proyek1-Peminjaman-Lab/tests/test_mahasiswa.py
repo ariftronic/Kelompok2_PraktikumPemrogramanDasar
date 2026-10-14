@@ -1,4 +1,4 @@
-from modules.mahasiswa import Mahasiswa
+from modules.sistem_lab import SistemLaboratorium
 
 
 def cek(nama, kondisi):
@@ -13,28 +13,48 @@ def cek(nama, kondisi):
 def main():
     lulus = 0
     total = 0
+    sistem = SistemLaboratorium()
 
-    mhs = Mahasiswa("K3525001", "Andi", "08123456789")
-
+    berhasil, pesan = sistem.tambah_mahasiswa(
+        "K3525001",
+        "Andi",
+        "08123456789",
+    )
     total = total + 1
-    lulus = lulus + cek("Data awal mahasiswa", mhs.nim == "K3525001" and mhs.nama == "Andi")
+    lulus = lulus + cek("Tambah mahasiswa", berhasil)
 
+    berhasil, pesan = sistem.tambah_mahasiswa(
+        "K3525001",
+        "Andi Dua",
+        "0812",
+    )
     total = total + 1
-    lulus = lulus + cek("Awal boleh meminjam", mhs.boleh_meminjam())
+    lulus = lulus + cek("NIM duplikat ditolak", not berhasil)
 
-    mhs.tambah_transaksi_aktif("TRX001")
-    mhs.tambah_transaksi_aktif("TRX002")
-
+    berhasil, pesan = sistem.edit_mahasiswa(
+        "K3525001",
+        "Andi Saputra",
+        "089999999",
+    )
     total = total + 1
-    lulus = lulus + cek("Maksimal dua transaksi aktif", not mhs.boleh_meminjam())
+    lulus = lulus + cek(
+        "Edit mahasiswa",
+        berhasil and sistem.mahasiswa["K3525001"].nama == "Andi Saputra",
+    )
 
+    hasil = sistem.cari_mahasiswa("saputra")
     total = total + 1
-    lulus = lulus + cek("Transaksi ketiga ditolak", not mhs.tambah_transaksi_aktif("TRX003"))
+    lulus = lulus + cek(
+        "Cari mahasiswa berdasarkan nama",
+        len(hasil) == 1,
+    )
 
-    mhs.hapus_transaksi_aktif("TRX001")
-
+    berhasil, pesan = sistem.hapus_mahasiswa("K3525001")
     total = total + 1
-    lulus = lulus + cek("Boleh pinjam lagi setelah satu selesai", mhs.boleh_meminjam())
+    lulus = lulus + cek(
+        "Hapus mahasiswa tanpa transaksi aktif",
+        berhasil and "K3525001" not in sistem.mahasiswa,
+    )
 
     print("\nHasil:", lulus, "dari", total, "pengujian lulus.")
 
