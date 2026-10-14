@@ -1,4 +1,4 @@
-from modules.peralatan import Peralatan
+from modules.sistem_lab import SistemLaboratorium
 
 
 def cek(nama, kondisi):
@@ -13,30 +13,46 @@ def cek(nama, kondisi):
 def main():
     lulus = 0
     total = 0
+    sistem = SistemLaboratorium()
 
-    alat = Peralatan("A001", "Kamera Digital", "multimedia")
+    berhasil, pesan = sistem.tambah_alat(
+        "A001",
+        "Kamera Digital",
+        "multimedia",
+    )
+    total = total + 1
+    lulus = lulus + cek("Tambah alat", berhasil)
+
+    berhasil, pesan = sistem.tambah_alat(
+        "A001",
+        "Kamera Lain",
+        "multimedia",
+    )
+    total = total + 1
+    lulus = lulus + cek("Kode alat duplikat ditolak", not berhasil)
+
+    alat = sistem.peralatan["A001"]
+    total = total + 1
+    lulus = lulus + cek("Alat baru dapat dipinjam", alat.dapat_dipinjam())
 
     total = total + 1
-    lulus = lulus + cek("Alat baru tersedia", alat.dapat_dipinjam())
-
-    alat.tandai_dipinjam()
-    total = total + 1
-    lulus = lulus + cek("Alat menjadi tidak tersedia saat dipinjam", not alat.tersedia)
-
-    alat.proses_pengembalian("baik")
-    total = total + 1
-    lulus = lulus + cek("Alat kondisi baik tersedia lagi", alat.tersedia and alat.kondisi == "baik")
-
-    alat.tandai_dipinjam()
-    alat.proses_pengembalian("rusak ringan")
-    total = total + 1
-    lulus = lulus + cek("Rusak ringan tidak tersedia", not alat.tersedia and alat.kondisi == "rusak ringan")
+    lulus = lulus + cek(
+        "Pencarian sebagian nama",
+        len(sistem.cari_alat("kamera")) == 1,
+    )
 
     total = total + 1
-    lulus = lulus + cek("Pencarian sebagian nama", alat.cocok_pencarian("kamera"))
+    lulus = lulus + cek(
+        "Pencarian kategori",
+        len(sistem.cari_alat("multimedia")) == 1,
+    )
 
+    berhasil, pesan = sistem.hapus_alat("A001")
     total = total + 1
-    lulus = lulus + cek("Pencarian kategori", alat.cocok_pencarian("multimedia"))
+    lulus = lulus + cek(
+        "Hapus alat tanpa transaksi aktif",
+        berhasil and "A001" not in sistem.peralatan,
+    )
 
     print("\nHasil:", lulus, "dari", total, "pengujian lulus.")
 

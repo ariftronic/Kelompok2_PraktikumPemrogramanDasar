@@ -22,28 +22,73 @@ def main():
     sistem.tambah_alat("A003", "Kabel LAN", "jaringan")
 
     total = total + 1
-    lulus = lulus + cek("Skenario 1 - tambah mahasiswa dan alat", len(sistem.mahasiswa) == 2 and len(sistem.peralatan) == 3)
+    lulus = lulus + cek(
+        "Skenario 1 - tambah mahasiswa dan alat",
+        len(sistem.mahasiswa) == 2 and len(sistem.peralatan) == 3,
+    )
 
-    berhasil, pesan, trx = sistem.buat_transaksi("M001", ["A001", "A002"], 7)
+    berhasil, pesan, trx = sistem.buat_transaksi(
+        "M001",
+        ["A001", "A002"],
+        7,
+    )
     total = total + 1
-    lulus = lulus + cek("Skenario 2 - pinjam beberapa alat", berhasil and not sistem.peralatan["A001"].tersedia and not sistem.peralatan["A002"].tersedia)
+    lulus = lulus + cek(
+        "Skenario 2 - pinjam beberapa alat",
+        berhasil
+        and not sistem.peralatan["A001"].tersedia
+        and not sistem.peralatan["A002"].tersedia,
+    )
 
-    berhasil2, pesan2, trx2 = sistem.buat_transaksi("M002", ["A001"], 7)
+    berhasil2, pesan2, trx2 = sistem.buat_transaksi(
+        "M002",
+        ["A001"],
+        7,
+    )
     total = total + 1
-    lulus = lulus + cek("Skenario 3 - alat tidak tersedia ditolak", not berhasil2)
+    lulus = lulus + cek(
+        "Skenario 3 - alat tidak tersedia ditolak",
+        not berhasil2,
+    )
 
-    berhasil3, pesan3, trx3 = sistem.proses_pengembalian(trx.id_transaksi, "A001", "baik")
+    berhasil3, pesan3, trx3 = sistem.proses_pengembalian(
+        trx.id_transaksi,
+        "A001",
+        "baik",
+    )
     total = total + 1
-    lulus = lulus + cek("Skenario 4 - pengembalian sebagian", berhasil3 and trx3.status == "sebagian dikembalikan" and sistem.peralatan["A001"].tersedia and not sistem.peralatan["A002"].tersedia)
+    lulus = lulus + cek(
+        "Skenario 4 - pengembalian sebagian",
+        berhasil3
+        and trx3.status == "sebagian dikembalikan"
+        and sistem.peralatan["A001"].tersedia
+        and not sistem.peralatan["A002"].tersedia,
+    )
 
-    berhasil4, pesan4, trx4 = sistem.proses_pengembalian(trx.id_transaksi, "A002", "rusak ringan")
+    berhasil4, pesan4, trx4 = sistem.proses_pengembalian(
+        trx.id_transaksi,
+        "A002",
+        "rusak ringan",
+    )
     total = total + 1
-    lulus = lulus + cek("Skenario 5 - alat rusak tidak tersedia", berhasil4 and not sistem.peralatan["A002"].tersedia and sistem.peralatan["A002"].kondisi == "rusak ringan")
+    lulus = lulus + cek(
+        "Skenario 5 - alat rusak tidak tersedia",
+        berhasil4
+        and not sistem.peralatan["A002"].tersedia
+        and sistem.peralatan["A002"].kondisi == "rusak ringan",
+    )
 
-    berhasil5, pesan5, trx5 = sistem.buat_transaksi("M001", ["A003"], 3)
+    berhasil5, pesan5, trx5 = sistem.buat_transaksi(
+        "M001",
+        ["A003"],
+        3,
+    )
     hapus, pesan_hapus = sistem.hapus_mahasiswa("M001")
     total = total + 1
-    lulus = lulus + cek("Skenario 6 - mahasiswa aktif tidak boleh dihapus", berhasil5 and not hapus)
+    lulus = lulus + cek(
+        "Skenario 6 - mahasiswa aktif tidak boleh dihapus",
+        berhasil5 and not hapus,
+    )
 
     print("\nTOTAL:", lulus, "dari", total, "skenario wajib lulus.")
 

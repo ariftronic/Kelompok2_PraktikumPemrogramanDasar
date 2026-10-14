@@ -17,9 +17,6 @@ class SistemLaboratorium:
         self.transaksi = {}
         self.urutan_transaksi = 0
 
-    # =========================
-    # CRUD MAHASISWA
-    # =========================
     def tambah_mahasiswa(self, nim, nama, no_hp):
         nim = str(nim).strip()
         nama = str(nama).strip()
@@ -32,10 +29,7 @@ class SistemLaboratorium:
             return False, "Nama tidak boleh kosong."
 
         if nim in self.mahasiswa:
-            if self.mahasiswa[nim].aktif:
-                return False, "NIM sudah terdaftar."
-            else:
-                return False, "NIM pernah digunakan dan tidak boleh didaftarkan ulang."
+            return False, "NIM sudah terdaftar."
 
         self.mahasiswa[nim] = Mahasiswa(nim, nama, no_hp)
         return True, "Mahasiswa berhasil ditambahkan."
@@ -43,7 +37,7 @@ class SistemLaboratorium:
     def edit_mahasiswa(self, nim, nama, no_hp):
         nim = str(nim).strip()
 
-        if nim not in self.mahasiswa or not self.mahasiswa[nim].aktif:
+        if nim not in self.mahasiswa:
             return False, "Mahasiswa tidak ditemukan."
 
         mhs = self.mahasiswa[nim]
@@ -66,33 +60,27 @@ class SistemLaboratorium:
     def hapus_mahasiswa(self, nim):
         nim = str(nim).strip()
 
-        if nim not in self.mahasiswa or not self.mahasiswa[nim].aktif:
+        if nim not in self.mahasiswa:
             return False, "Mahasiswa tidak ditemukan."
 
-        mhs = self.mahasiswa[nim]
-
-        if mhs.jumlah_transaksi_aktif() > 0:
+        if self.mahasiswa[nim].jumlah_transaksi_aktif() > 0:
             return False, "Mahasiswa masih memiliki transaksi aktif dan tidak dapat dihapus."
 
-        mhs.nonaktifkan()
-        return True, "Mahasiswa berhasil dinonaktifkan."
+        del self.mahasiswa[nim]
+        return True, "Mahasiswa berhasil dihapus."
 
     def cari_mahasiswa(self, keyword):
         keyword = str(keyword).strip().lower()
         hasil = []
 
         for mhs in self.mahasiswa.values():
-            if mhs.aktif:
-                if keyword == "":
-                    hasil.append(mhs)
-                elif keyword in mhs.nim.lower() or keyword in mhs.nama.lower():
-                    hasil.append(mhs)
+            if keyword == "":
+                hasil.append(mhs)
+            elif keyword in mhs.nim.lower() or keyword in mhs.nama.lower():
+                hasil.append(mhs)
 
         return hasil
 
-    # =========================
-    # CRUD PERALATAN
-    # =========================
     def tambah_alat(self, kode_alat, nama_alat, kategori):
         kode_alat = str(kode_alat).strip()
         nama_alat = str(nama_alat).strip()
@@ -108,10 +96,7 @@ class SistemLaboratorium:
             return False, "Kategori alat tidak boleh kosong."
 
         if kode_alat in self.peralatan:
-            if self.peralatan[kode_alat].aktif:
-                return False, "Kode alat sudah terdaftar."
-            else:
-                return False, "Kode alat pernah digunakan dan tidak boleh didaftarkan ulang."
+            return False, "Kode alat sudah terdaftar."
 
         self.peralatan[kode_alat] = Peralatan(kode_alat, nama_alat, kategori)
         return True, "Peralatan berhasil ditambahkan."
@@ -119,7 +104,7 @@ class SistemLaboratorium:
     def edit_alat(self, kode_alat, nama_alat, kategori):
         kode_alat = str(kode_alat).strip()
 
-        if kode_alat not in self.peralatan or not self.peralatan[kode_alat].aktif:
+        if kode_alat not in self.peralatan:
             return False, "Peralatan tidak ditemukan."
 
         alat = self.peralatan[kode_alat]
@@ -142,19 +127,17 @@ class SistemLaboratorium:
     def hapus_alat(self, kode_alat):
         kode_alat = str(kode_alat).strip()
 
-        if kode_alat not in self.peralatan or not self.peralatan[kode_alat].aktif:
+        if kode_alat not in self.peralatan:
             return False, "Peralatan tidak ditemukan."
 
         for trx in self.transaksi.values():
-            for item in trx.daftar_item:
-                if (
-                    item.alat.kode_alat == kode_alat
-                    and item.masih_dipinjam()
-                ):
-                    return False, "Alat masih dipinjam dan tidak dapat dihapus."
+            if trx.aktif():
+                for item in trx.daftar_item:
+                    if item.alat.kode_alat == kode_alat:
+                        return False, "Alat masih tercatat dalam transaksi aktif dan tidak dapat dihapus."
 
-        self.peralatan[kode_alat].nonaktifkan()
-        return True, "Peralatan berhasil dinonaktifkan."
+        del self.peralatan[kode_alat]
+        return True, "Peralatan berhasil dihapus."
 
     def cari_alat(self, keyword):
         hasil = []
@@ -169,7 +152,7 @@ class SistemLaboratorium:
         hasil = []
 
         for alat in self.peralatan.values():
-            if alat.aktif and alat.tersedia:
+            if alat.tersedia:
                 hasil.append(alat)
 
         return hasil
@@ -178,7 +161,7 @@ class SistemLaboratorium:
         hasil = []
 
         for alat in self.peralatan.values():
-            if alat.aktif and not alat.tersedia and alat.kondisi == "baik":
+            if not alat.tersedia and alat.kondisi == "baik":
                 hasil.append(alat)
 
         return hasil
@@ -187,39 +170,18 @@ class SistemLaboratorium:
         hasil = []
 
         for alat in self.peralatan.values():
-            if alat.aktif and alat.kondisi != "baik":
+            if alat.kondisi != "baik":
                 hasil.append(alat)
 
         return hasil
 
-    def perbaiki_alat(self, kode_alat):
-        kode_alat = str(kode_alat).strip()
-
-        if kode_alat not in self.peralatan or not self.peralatan[kode_alat].aktif:
-            return False, "Peralatan tidak ditemukan."
-
-        alat = self.peralatan[kode_alat]
-
-        if alat.kondisi == "baik":
-            return False, "Alat tidak dalam kondisi rusak."
-
-        berhasil = alat.perbaiki()
-
-        if berhasil:
-            return True, "Peralatan selesai diperbaiki dan tersedia kembali."
-        else:
-            return False, "Peralatan gagal diperbaiki."
-
-    # =========================
-    # TRANSAKSI
-    # =========================
     def buat_transaksi(self, nim, daftar_kode, lama_hari=MAKS_HARI_PINJAM, tanggal_pinjam=None):
         nim = str(nim).strip()
 
         if tanggal_pinjam is None:
             tanggal_pinjam = date.today()
 
-        if nim not in self.mahasiswa or not self.mahasiswa[nim].aktif:
+        if nim not in self.mahasiswa:
             return False, "Mahasiswa tidak ditemukan.", None
 
         mhs = self.mahasiswa[nim]
@@ -259,7 +221,7 @@ class SistemLaboratorium:
 
             kode_unik.append(kode)
 
-            if kode not in self.peralatan or not self.peralatan[kode].aktif:
+            if kode not in self.peralatan:
                 return False, "Alat " + kode + " tidak ditemukan.", None
 
             alat = self.peralatan[kode]
@@ -356,17 +318,10 @@ class SistemLaboratorium:
         hasil = []
 
         for trx in self.transaksi.values():
-            if trx.mahasiswa.nim == nim and trx.aktif():
+            if trx.mahasiswa.nim == nim:
                 hasil.append(trx)
 
         return hasil
 
     def riwayat_peminjaman(self, nim):
-        nim = str(nim).strip()
-        hasil = []
-
-        for trx in self.transaksi.values():
-            if trx.mahasiswa.nim == nim:
-                hasil.append(trx)
-
-        return hasil
+        return self.cari_transaksi_mahasiswa(nim)

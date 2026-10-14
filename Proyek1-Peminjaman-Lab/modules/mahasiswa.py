@@ -7,7 +7,6 @@ class Mahasiswa:
         self.nama = str(nama).strip()
         self.no_hp = str(no_hp).strip()
         self.transaksi_aktif = []
-        self.aktif = True
 
     def update_data(self, nama, no_hp):
         nama = str(nama).strip()
@@ -24,7 +23,7 @@ class Mahasiswa:
         return len(self.transaksi_aktif)
 
     def boleh_meminjam(self):
-        if self.aktif and self.jumlah_transaksi_aktif() < MAKS_TRANSAKSI_AKTIF:
+        if self.jumlah_transaksi_aktif() < MAKS_TRANSAKSI_AKTIF:
             return True
         else:
             return False
@@ -58,13 +57,6 @@ class Mahasiswa:
             return True
         else:
             return False
-
-    def nonaktifkan(self):
-        if self.jumlah_transaksi_aktif() > 0:
-            return False
-
-        self.aktif = False
-        return True
 
     def tampilkan_info(self):
         print(f"NIM             : {self.nim}")

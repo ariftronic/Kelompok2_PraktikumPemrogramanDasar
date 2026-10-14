@@ -35,24 +35,7 @@ class ItemPeminjaman:
         self.kondisi_kembali = kondisi
         return True, "Pengembalian item berhasil."
 
-    def terlambat(self, batas_kembali, tanggal_acuan=None):
-        if self.sudah_dikembalikan:
-            tanggal_dibandingkan = self.tanggal_kembali
-        else:
-            if tanggal_acuan is None:
-                tanggal_dibandingkan = date.today()
-            else:
-                tanggal_dibandingkan = tanggal_acuan
-
-        if tanggal_dibandingkan > batas_kembali:
-            return True
-        else:
-            return False
-
     def jumlah_hari_terlambat(self, batas_kembali, tanggal_acuan=None):
-        if not self.terlambat(batas_kembali, tanggal_acuan):
-            return 0
-
         if self.sudah_dikembalikan:
             tanggal_dibandingkan = self.tanggal_kembali
         else:
@@ -60,6 +43,9 @@ class ItemPeminjaman:
                 tanggal_dibandingkan = date.today()
             else:
                 tanggal_dibandingkan = tanggal_acuan
+
+        if tanggal_dibandingkan <= batas_kembali:
+            return 0
 
         selisih = tanggal_dibandingkan - batas_kembali
         return selisih.days
