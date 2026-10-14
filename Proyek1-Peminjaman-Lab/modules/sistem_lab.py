@@ -1,177 +1,280 @@
 from datetime import date, timedelta
-from typing import Dict, List, Optional
 
 from modules.mahasiswa import Mahasiswa
 from modules.peralatan import Peralatan
 from modules.transaksi import TransaksiPeminjaman
 
-KONDISI_VALID = ("baik", "rusak ringan", "rusak berat")
-STATUS_AKTIF = ("dipinjam", "sebagian dikembalikan")
 MAKS_HARI_PINJAM = 7
+KONDISI_VALID = ("baik", "rusak ringan", "rusak berat")
 
-def _cocok(keyword: str, *teks: str) -> bool:
-    k = keyword.strip().lower()
-    return any(k in t.lower() for t in teks)
 
 class SistemLaboratorium:
     def __init__(self):
-        self.mahasiswa: Dict[str, Mahasiswa] = {}
-        self.peralatan: Dict[str, Peralatan] = {}
-        self.transaksi: Dict[str, TransaksiPeminjaman] = {}
-        self._urutan_transaksi = 0
+        self.mahasiswa = {}
+        self.peralatan = {}
+        self.transaksi = {}
+        self.urutan_transaksi = 0
 
-    def tambah_mahasiswa(self, data: dict) -> bool:
-        """data: {"nim", "nama", "no_hp"}. Gagal -> ValueError."""
-        nim = str(data.get("nim", "")).strip()
-        nama = str(data.get("nama", "")).strip()
-        if not nim:
-            raise ValueError("NIM tidak boleh kosong.")
-        if not nama:
-            raise ValueError("Nama tidak boleh kosong.")
+    # =========================
+    # CRUD MAHASISWA
+    # =========================
+    def tambah_mahasiswa(self, nim, nama, no_hp):
+        nim = str(nim).strip()
+        nama = str(nama).strip()
+        no_hp = str(no_hp).strip()
+
+        if nim == "":
+            return False, "NIM tidak boleh kosong."
+
+        if nama == "":
+            return False, "Nama tidak boleh kosong."
+
         if nim in self.mahasiswa:
-            raise ValueError(f"NIM {nim} sudah terdaftar.")
-        self.mahasiswa[nim] = Mahasiswa(nim, nama, str(data.get("no_hp", "")).strip())
-        return True
+            return False, "NIM sudah terdaftar."
 
-    def edit_mahasiswa(self, nim: str, data: dict) -> bool:
-        """data boleh berisi "nama" dan/atau "no_hp"; yang tidak diisi tidak berubah."""
-        mhs = self.mahasiswa.get(nim)
-        if mhs is None:
-            raise ValueError(f"Mahasiswa {nim} tidak ditemukan.")
-        nama = str(data.get("nama", mhs.nama)).strip()
-        if not nama:
-            raise ValueError("Nama tidak boleh kosong.")
-        mhs.update_data(nama, str(data.get("no_hp", mhs.no_hp)).strip())
-        return True
+        self.mahasiswa[nim] = Mahasiswa(nim, nama, no_hp)
+        return True, "Mahasiswa berhasil ditambahkan."
 
-    def hapus_mahasiswa(self, nim: str) -> bool:
+    def edit_mahasiswa(self, nim, nama, no_hp):
+        nim = str(nim).strip()
+
         if nim not in self.mahasiswa:
-            raise ValueError(f"Mahasiswa {nim} tidak ditemukan.")
-        if self.cari_transaksi_mahasiswa(nim):
-            raise ValueError("Mahasiswa masih memiliki transaksi aktif; tidak dapat dihapus.")
+            return False, "Mahasiswa tidak ditemukan."
+
+        berhasil = self.mahasiswa[nim].update_data(nama, no_hp)
+        if not berhasil:
+            return False, "Nama tidak boleh kosong."
+
+        return True, "Data mahasiswa berhasil diperbarui."
+
+    def hapus_mahasiswa(self, nim):
+        nim = str(nim).strip()
+
+        if nim not in self.mahasiswa:
+            return False, "Mahasiswa tidak ditemukan."
+
+        if self.mahasiswa[nim].jumlah_transaksi_aktif() > 0:
+            return False, "Mahasiswa masih memiliki transaksi aktif dan tidak dapat dihapus."
+
         del self.mahasiswa[nim]
-        return True
+        return True, "Mahasiswa berhasil dihapus."
 
-    def cari_mahasiswa(self, keyword: str) -> List[Mahasiswa]:
-        """Cocokkan NIM atau sebagian nama (tanpa peka huruf besar/kecil). Kosong = semua."""
-        return [m for m in self.mahasiswa.values() if _cocok(keyword, m.nim, m.nama)]
+    def cari_mahasiswa(self, keyword):
+        keyword = str(keyword).strip().lower()
+        hasil = []
 
-    def tambah_alat(self, data: dict) -> bool:
-        """data: {"kode_alat", "nama_alat", "kategori"}. Gagal -> ValueError."""
-        kode = str(data.get("kode_alat", "")).strip()
-        nama = str(data.get("nama_alat", "")).strip()
-        if not kode:
-            raise ValueError("Kode alat tidak boleh kosong.")
-        if not nama:
-            raise ValueError("Nama alat tidak boleh kosong.")
-        if kode in self.peralatan:
-            raise ValueError(f"Kode alat {kode} sudah terdaftar.")
-        self.peralatan[kode] = Peralatan(kode, nama, str(data.get("kategori", "")).strip())
-        return True
+        for mhs in self.mahasiswa.values():
+            if keyword == "":
+                hasil.append(mhs)
+            elif keyword in mhs.nim.lower() or keyword in mhs.nama.lower():
+                hasil.append(mhs)
 
-    def edit_alat(self, kode: str, data: dict) -> bool:
-        """data boleh berisi "nama_alat" dan/atau "kategori"."""
-        alat = self.peralatan.get(kode)
-        if alat is None:
-            raise ValueError(f"Alat {kode} tidak ditemukan.")
-        nama = str(data.get("nama_alat", alat.nama_alat)).strip()
-        if not nama:
-            raise ValueError("Nama alat tidak boleh kosong.")
-        alat.update_data(nama, str(data.get("kategori", alat.kategori)).strip())
-        return True
+        return hasil
 
-    def hapus_alat(self, kode: str) -> bool:
-        if kode not in self.peralatan:
-            raise ValueError(f"Alat {kode} tidak ditemukan.")
+    # =========================
+    # CRUD PERALATAN
+    # =========================
+    def tambah_alat(self, kode_alat, nama_alat, kategori):
+        kode_alat = str(kode_alat).strip()
+        nama_alat = str(nama_alat).strip()
+        kategori = str(kategori).strip()
+
+        if kode_alat == "":
+            return False, "Kode alat tidak boleh kosong."
+
+        if nama_alat == "":
+            return False, "Nama alat tidak boleh kosong."
+
+        if kode_alat in self.peralatan:
+            return False, "Kode alat sudah terdaftar."
+
+        self.peralatan[kode_alat] = Peralatan(kode_alat, nama_alat, kategori)
+        return True, "Peralatan berhasil ditambahkan."
+
+    def edit_alat(self, kode_alat, nama_alat, kategori):
+        kode_alat = str(kode_alat).strip()
+
+        if kode_alat not in self.peralatan:
+            return False, "Peralatan tidak ditemukan."
+
+        berhasil = self.peralatan[kode_alat].update_data(nama_alat, kategori)
+        if not berhasil:
+            return False, "Nama alat tidak boleh kosong."
+
+        return True, "Data peralatan berhasil diperbarui."
+
+    def hapus_alat(self, kode_alat):
+        kode_alat = str(kode_alat).strip()
+
+        if kode_alat not in self.peralatan:
+            return False, "Peralatan tidak ditemukan."
+
         for trx in self.transaksi.values():
-            if trx.status in STATUS_AKTIF and any(
-                i.alat.kode_alat == kode for i in trx.daftar_item
-            ):
-                raise ValueError(
-                    f"Alat masih tercatat pada transaksi aktif {trx.id_transaksi}; tidak dapat dihapus."
-                )
-        del self.peralatan[kode]
-        return True
+            if trx.aktif():
+                for item in trx.daftar_item:
+                    if item.alat.kode_alat == kode_alat:
+                        return False, "Alat masih tercatat pada transaksi aktif dan tidak dapat dihapus."
 
-    def cari_alat(self, keyword: str) -> List[Peralatan]:
-        """Tantangan A: kode (persis), sebagian nama, atau kategori; tanpa peka huruf besar/kecil."""
-        k = keyword.strip().lower()
-        return [a for a in self.peralatan.values()
-                if k == a.kode_alat.lower() or k in a.nama_alat.lower() or k in a.kategori.lower()]
+        del self.peralatan[kode_alat]
+        return True, "Peralatan berhasil dihapus."
 
-    def alat_tersedia(self) -> List[Peralatan]:
-        return [a for a in self.peralatan.values() if a.tersedia]
+    def cari_alat(self, keyword):
+        hasil = []
 
-    def alat_dipinjam(self) -> List[Peralatan]:
-        return [a for a in self.peralatan.values() if not a.tersedia and a.kondisi == "baik"]
+        for alat in self.peralatan.values():
+            if alat.cocok_pencarian(keyword):
+                hasil.append(alat)
 
-    def alat_rusak(self) -> List[Peralatan]:
-        return [a for a in self.peralatan.values() if a.kondisi != "baik"]
+        return hasil
 
-    def buat_transaksi(self, nim: str, daftar_kode: List[str],
-                       lama_hari: int = MAKS_HARI_PINJAM,
-                       tanggal_pinjam: Optional[date] = None) -> TransaksiPeminjaman:
-        tanggal_pinjam = tanggal_pinjam or date.today()
-        mhs = self.mahasiswa.get(nim)
-        if mhs is None:
-            raise ValueError(f"Mahasiswa {nim} tidak ditemukan.")
-        if not daftar_kode:
-            raise ValueError("Transaksi minimal berisi 1 alat.")
-        if len(set(daftar_kode)) != len(daftar_kode):
-            raise ValueError("Kode alat duplikat dalam satu transaksi.")
+    def alat_tersedia(self):
+        hasil = []
+
+        for alat in self.peralatan.values():
+            if alat.tersedia:
+                hasil.append(alat)
+
+        return hasil
+
+    def alat_dipinjam(self):
+        hasil = []
+
+        for alat in self.peralatan.values():
+            if not alat.tersedia and alat.kondisi == "baik":
+                hasil.append(alat)
+
+        return hasil
+
+    def alat_rusak(self):
+        hasil = []
+
+        for alat in self.peralatan.values():
+            if alat.kondisi != "baik":
+                hasil.append(alat)
+
+        return hasil
+
+    # =========================
+    # TRANSAKSI
+    # =========================
+    def buat_transaksi(self, nim, daftar_kode, lama_hari=7, tanggal_pinjam=None):
+        nim = str(nim).strip()
+
+        if tanggal_pinjam is None:
+            tanggal_pinjam = date.today()
+
+        if nim not in self.mahasiswa:
+            return False, "Mahasiswa tidak ditemukan.", None
+
+        mhs = self.mahasiswa[nim]
+
         if not mhs.boleh_meminjam():
-            raise ValueError("Mahasiswa sudah memiliki 2 transaksi aktif.")
-        if not 1 <= lama_hari <= MAKS_HARI_PINJAM:
-            raise ValueError(f"Lama pinjam harus 1-{MAKS_HARI_PINJAM} hari.")
-        daftar_alat = []
-        for kode in daftar_kode:
-            alat = self.peralatan.get(kode)
-            if alat is None:
-                raise ValueError(f"Alat {kode} tidak ditemukan.")
-            if not alat.dapat_dipinjam():
-                raise ValueError(f"Alat {kode} tidak tersedia.")
-            daftar_alat.append(alat)
-        self._urutan_transaksi += 1
-        id_trx = f"TRX{self._urutan_transaksi:03d}"
-        trx = TransaksiPeminjaman(id_trx, mhs, tanggal_pinjam,
-                                  tanggal_pinjam + timedelta(days=lama_hari))
-        for alat in daftar_alat:
-            trx.tambah_item(alat)
-            alat.tandai_dipinjam()
-        mhs.tambah_transaksi_aktif(id_trx)
-        self.transaksi[id_trx] = trx
-        return trx
+            return False, "Mahasiswa sudah memiliki maksimal 2 transaksi aktif.", None
 
-    def proses_pengembalian(self, id_transaksi: str, kode_alat: str, kondisi: str,
-                            tanggal: Optional[date] = None) -> bool:
-        """Kembalikan satu alat. True jika berhasil; status baru ada di transaksi[id].status."""
-        tanggal = tanggal or date.today()
-        kondisi = kondisi.strip().lower()
-        trx = self.transaksi.get(id_transaksi)
-        if trx is None:
-            raise ValueError(f"Transaksi {id_transaksi} tidak ditemukan.")
+        if len(daftar_kode) == 0:
+            return False, "Transaksi minimal berisi 1 alat.", None
+
+        if lama_hari < 1 or lama_hari > MAKS_HARI_PINJAM:
+            return False, "Lama peminjaman harus antara 1 sampai 7 hari.", None
+
+        kode_unik = []
+        daftar_alat = []
+
+        for kode in daftar_kode:
+            kode = str(kode).strip()
+
+            if kode == "":
+                continue
+
+            if kode in kode_unik:
+                return False, "Kode alat tidak boleh duplikat dalam satu transaksi.", None
+
+            kode_unik.append(kode)
+
+            if kode not in self.peralatan:
+                return False, "Alat " + kode + " tidak ditemukan.", None
+
+            alat = self.peralatan[kode]
+
+            if not alat.dapat_dipinjam():
+                return False, "Alat " + kode + " tidak tersedia.", None
+
+            daftar_alat.append(alat)
+
+        if len(daftar_alat) == 0:
+            return False, "Tidak ada alat valid yang dipilih.", None
+
+        self.urutan_transaksi = self.urutan_transaksi + 1
+        id_transaksi = "TRX" + str(self.urutan_transaksi).zfill(3)
+        batas_kembali = tanggal_pinjam + timedelta(days=lama_hari)
+
+        trx = TransaksiPeminjaman(
+            id_transaksi,
+            mhs,
+            daftar_alat,
+            tanggal_pinjam,
+            batas_kembali
+        )
+
+        for alat in daftar_alat:
+            alat.tandai_dipinjam()
+
+        mhs.tambah_transaksi_aktif(id_transaksi)
+        self.transaksi[id_transaksi] = trx
+
+        return True, "Transaksi berhasil dibuat dengan ID " + id_transaksi + ".", trx
+
+    def proses_pengembalian(self, id_transaksi, kode_alat, kondisi, tanggal_kembali=None):
+        id_transaksi = str(id_transaksi).strip()
+        kode_alat = str(kode_alat).strip()
+        kondisi = str(kondisi).strip().lower()
+
+        if tanggal_kembali is None:
+            tanggal_kembali = date.today()
+
+        if id_transaksi not in self.transaksi:
+            return False, "Transaksi tidak ditemukan.", None
+
         if kondisi not in KONDISI_VALID:
-            raise ValueError(f"Kondisi harus salah satu dari: {', '.join(KONDISI_VALID)}.")
-        item_alat = [i for i in trx.daftar_item if i.alat.kode_alat == kode_alat]
-        if not item_alat:
-            raise ValueError(f"Alat {kode_alat} tidak ada pada transaksi {id_transaksi}.")
-        item = item_alat[0]
-        if not item.masih_dipinjam():
-            raise ValueError(f"Alat {kode_alat} sudah dikembalikan sebelumnya.")
-        item.kembalikan(kondisi, tanggal)
+            return False, "Kondisi harus: baik, rusak ringan, atau rusak berat.", None
+
+        trx = self.transaksi[id_transaksi]
+
+        berhasil, pesan, item = trx.kembalikan_alat(kode_alat, kondisi, tanggal_kembali)
+        if not berhasil:
+            return False, pesan, trx
+
         item.alat.proses_pengembalian(kondisi)
-        trx.update_status()
+
         if trx.seluruh_alat_kembali():
             trx.mahasiswa.hapus_transaksi_aktif(id_transaksi)
-        return True
 
-    def cari_transaksi_mahasiswa(self, nim: str) -> List[TransaksiPeminjaman]:
-        """Transaksi AKTIF milik mahasiswa (dipinjam / sebagian dikembalikan)."""
-        return [t for t in self.transaksi.values()
-                if t.mahasiswa.nim == nim and t.status in STATUS_AKTIF]
+        return True, "Pengembalian berhasil. Status transaksi: " + trx.status + ".", trx
 
-    def riwayat_peminjaman(self, nim: str) -> List[TransaksiPeminjaman]:
-        """Semua transaksi (aktif + selesai) milik mahasiswa."""
-        if nim not in self.mahasiswa:
-            raise ValueError(f"Mahasiswa {nim} tidak ditemukan.")
-        return [t for t in self.transaksi.values() if t.mahasiswa.nim == nim]
+    def semua_transaksi(self):
+        hasil = []
+
+        for trx in self.transaksi.values():
+            hasil.append(trx)
+
+        return hasil
+
+    def cari_transaksi_mahasiswa(self, nim):
+        nim = str(nim).strip()
+        hasil = []
+
+        for trx in self.transaksi.values():
+            if trx.mahasiswa.nim == nim and trx.aktif():
+                hasil.append(trx)
+
+        return hasil
+
+    def riwayat_peminjaman(self, nim):
+        nim = str(nim).strip()
+        hasil = []
+
+        for trx in self.transaksi.values():
+            if trx.mahasiswa.nim == nim:
+                hasil.append(trx)
+
+        return hasil

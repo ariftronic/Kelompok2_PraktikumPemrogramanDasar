@@ -1,41 +1,101 @@
-from collections import Counter
-from typing import List, Optional, Tuple
-
-from modules.mahasiswa import Mahasiswa
-from modules.peralatan import Peralatan
-from modules.sistem_lab import SistemLaboratorium, STATUS_AKTIF
-
 class StatistikPeminjaman:
-    def __init__(self, sistem: SistemLaboratorium):
+    def __init__(self, sistem):
         self.sistem = sistem
 
-    def ranking_alat(self) -> List[Tuple[Peralatan, int]]:
-        hitung, objek = Counter(), {}
+    def alat_terpopuler(self):
+        jumlah = {}
+        objek = {}
+
         for trx in self.sistem.transaksi.values():
             for item in trx.daftar_item:
-                hitung[item.alat.kode_alat] += 1
-                objek[item.alat.kode_alat] = item.alat
-        return [(objek[k], n) for k, n in hitung.most_common()]
+                kode = item.alat.kode_alat
 
-    def ranking_mahasiswa(self) -> List[Tuple[Mahasiswa, int]]:
-        hitung, objek = Counter(), {}
+                if kode in jumlah:
+                    jumlah[kode] = jumlah[kode] + 1
+                else:
+                    jumlah[kode] = 1
+                    objek[kode] = item.alat
+
+        kode_terpilih = None
+        nilai_terbesar = 0
+
+        for kode in jumlah:
+            if jumlah[kode] > nilai_terbesar:
+                nilai_terbesar = jumlah[kode]
+                kode_terpilih = kode
+
+        if kode_terpilih is None:
+            return None, 0
+
+        return objek[kode_terpilih], nilai_terbesar
+
+    def mahasiswa_teraktif(self):
+        jumlah = {}
+        objek = {}
+
         for trx in self.sistem.transaksi.values():
-            hitung[trx.mahasiswa.nim] += 1
-            objek[trx.mahasiswa.nim] = trx.mahasiswa
-        return [(objek[k], n) for k, n in hitung.most_common()]
+            nim = trx.mahasiswa.nim
 
-    def alat_terpopuler(self) -> Optional[Peralatan]:
-        """Alat paling sering dipinjam (seri: yang pertama kali dipinjam). None jika belum ada data."""
-        ranking = self.ranking_alat()
-        return ranking[0][0] if ranking else None
+            if nim in jumlah:
+                jumlah[nim] = jumlah[nim] + 1
+            else:
+                jumlah[nim] = 1
+                objek[nim] = trx.mahasiswa
 
-    def mahasiswa_teraktif(self) -> Optional[Mahasiswa]:
-        """Mahasiswa dengan transaksi terbanyak. None jika belum ada data."""
-        ranking = self.ranking_mahasiswa()
-        return ranking[0][0] if ranking else None
+        nim_terpilih = None
+        nilai_terbesar = 0
 
-    def jumlah_transaksi_selesai(self) -> int:
-        return sum(t.status == "selesai" for t in self.sistem.transaksi.values())
+        for nim in jumlah:
+            if jumlah[nim] > nilai_terbesar:
+                nilai_terbesar = jumlah[nim]
+                nim_terpilih = nim
 
-    def jumlah_transaksi_aktif(self) -> int:
-        return sum(t.status in STATUS_AKTIF for t in self.sistem.transaksi.values())
+        if nim_terpilih is None:
+            return None, 0
+
+        return objek[nim_terpilih], nilai_terbesar
+
+    def jumlah_transaksi_selesai(self):
+        jumlah = 0
+
+        for trx in self.sistem.transaksi.values():
+            if trx.status == "selesai":
+                jumlah = jumlah + 1
+
+        return jumlah
+
+    def jumlah_transaksi_aktif(self):
+        jumlah = 0
+
+        for trx in self.sistem.transaksi.values():
+            if trx.status == "dipinjam" or trx.status == "sebagian dikembalikan":
+                jumlah = jumlah + 1
+
+        return jumlah
+
+    def tampilkan_statistik(self):
+        alat, jumlah_alat = self.alat_terpopuler()
+        mahasiswa, jumlah_mahasiswa = self.mahasiswa_teraktif()
+
+        print("\n===== STATISTIK PEMINJAMAN =====")
+
+        if alat is None:
+            print("Alat paling sering dipinjam      : Belum ada data")
+        else:
+            print(
+                "Alat paling sering dipinjam      :",
+                alat.nama_alat,
+                "(", jumlah_alat, "kali )"
+            )
+
+        if mahasiswa is None:
+            print("Mahasiswa paling sering meminjam : Belum ada data")
+        else:
+            print(
+                "Mahasiswa paling sering meminjam :",
+                mahasiswa.nama,
+                "(", jumlah_mahasiswa, "transaksi )"
+            )
+
+        print("Jumlah transaksi selesai         :", self.jumlah_transaksi_selesai())
+        print("Jumlah transaksi aktif           :", self.jumlah_transaksi_aktif())

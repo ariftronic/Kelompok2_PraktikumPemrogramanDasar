@@ -3,16 +3,12 @@ class Mahasiswa:
         self.nim = str(nim).strip()
         self.nama = str(nama).strip()
         self.no_hp = str(no_hp).strip()
-
-        # Menyimpan ID transaksi yang masih aktif.
         self.transaksi_aktif = []
 
     def update_data(self, nama, no_hp):
         nama = str(nama).strip()
         no_hp = str(no_hp).strip()
 
-        # Faris mewajibkan nama tidak kosong.
-        # Nomor HP tetap disimpan sesuai data yang diberikan.
         if nama == "":
             return False
 
@@ -24,7 +20,6 @@ class Mahasiswa:
         return len(self.transaksi_aktif)
 
     def boleh_meminjam(self):
-        # Aturan proyek: maksimal 2 transaksi aktif.
         if self.jumlah_transaksi_aktif() < 2:
             return True
         else:
@@ -54,13 +49,19 @@ class Mahasiswa:
         self.transaksi_aktif.remove(id_transaksi)
         return True
 
-    def tampilkan_info(self):
-        print("NIM              :", self.nim)
-        print("Nama             :", self.nama)
-        print("Nomor HP         :", self.no_hp)
-        print("Transaksi aktif  :", self.jumlah_transaksi_aktif())
-
+    def status_aktif_peminjaman(self):
         if self.jumlah_transaksi_aktif() > 0:
-            print("Status pinjaman  : Aktif")
+            return True
         else:
-            print("Status pinjaman  : Tidak aktif")
+            return False
+
+    def tampilkan_info(self):
+        print("NIM             :", self.nim)
+        print("Nama            :", self.nama)
+        print("Nomor HP        :", self.no_hp)
+        print("Transaksi aktif :", self.jumlah_transaksi_aktif())
+
+        if self.status_aktif_peminjaman():
+            print("Status pinjaman : Aktif")
+        else:
+            print("Status pinjaman : Tidak aktif")
