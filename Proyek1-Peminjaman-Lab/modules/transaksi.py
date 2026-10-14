@@ -1,16 +1,3 @@
-"""modules/transaksi.py
-
-PIC: Niken (Orang 3) - Transaksi dan Item.
-Memuat dua class sesuai UML:
-  - ItemPeminjaman      : satu alat di dalam satu transaksi
-  - TransaksiPeminjaman : satu transaksi berisi >= 1 ItemPeminjaman
-
-Status transaksi diturunkan dari status item (tidak diisi manual):
-  belum ada item kembali  -> "dipinjam"
-  sebagian item kembali   -> "sebagian dikembalikan"
-  seluruh item kembali    -> "selesai"
-"""
-
 from datetime import date, timedelta
 from typing import Dict, List, Optional
 
@@ -23,8 +10,6 @@ MAKS_TRANSAKSI_AKTIF = 2
 
 
 class ItemPeminjaman:
-    """Satu alat yang dipinjam dalam sebuah transaksi."""
-
     def __init__(self, alat):
         self.alat = alat
         self.sudah_dikembalikan: bool = False
@@ -35,7 +20,6 @@ class ItemPeminjaman:
         return not self.sudah_dikembalikan
 
     def kembalikan(self, kondisi: str, tanggal: date) -> None:
-        """Tandai item sudah kembali. Item tidak boleh dikembalikan dua kali."""
         if self.sudah_dikembalikan:
             raise ValueError(
                 f"Alat '{self.alat.kode}' sudah dikembalikan pada {self.tanggal_kembali}."
@@ -189,13 +173,7 @@ def riwayat_peminjaman(daftar_transaksi: List[TransaksiPeminjaman],
             })
     return hasil
 
-
 def statistik_penggunaan_alat(daftar_transaksi: List[TransaksiPeminjaman]) -> Dict[str, int]:
-    """Berapa kali tiap alat dipinjam, dihitung dari transaksi yang BERHASIL dibuat.
-
-    Percobaan yang gagal validasi tidak pernah menjadi objek transaksi, sehingga
-    otomatis tidak ikut terhitung.
-    """
     statistik: Dict[str, int] = {}
     for t in daftar_transaksi:
         for item in t.daftar_item:
