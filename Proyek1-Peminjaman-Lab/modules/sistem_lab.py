@@ -28,6 +28,9 @@ class SistemLaboratorium:
         if nama == "":
             return False, "Nama tidak boleh kosong."
 
+        if no_hp == "":
+            return False, "Nomor HP tidak boleh kosong."
+
         if nim in self.mahasiswa:
             return False, "NIM sudah terdaftar."
 
@@ -93,6 +96,9 @@ class SistemLaboratorium:
 
         if kode_alat == "":
             return False, "Kode alat tidak boleh kosong."
+
+        if kode_alat.lower() in ["selesai", "batal"]:
+            return False, "Kode selesai/batal digunakan sebagai perintah menu."
 
         if nama_alat == "":
             return False, "Nama alat tidak boleh kosong."

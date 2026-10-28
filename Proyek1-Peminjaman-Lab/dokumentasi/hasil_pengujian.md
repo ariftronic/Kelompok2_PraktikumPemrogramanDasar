@@ -68,3 +68,36 @@ Pengujian duplikasi alat kini menggunakan alat tersedia dan memeriksa pesan peno
 Hasil ini merupakan pengujian teknis, bukan hasil cross-group code review. Jalankan ulang jika kode berubah.
 
 
+
+## Verifikasi PresentasiV2 - 28 Oktober 2026
+
+Basis: branch Presentasi, commit `a510646`. Pengujian dijalankan pada kode V2 sebelum publikasi branch.
+
+| Kelompok | Hasil aktual |
+|---|---|
+| Enam modul tes sebelumnya | 44/44 lulus |
+| test_presentasi_v2 | 12/12 lulus |
+| Total pemeriksaan modul | 56/56 lulus |
+| Pemeriksaan sintaks compileall | Lulus |
+| Alur menu melalui input terminal | 14/14 lulus |
+
+Dua belas pemeriksaan baru menguji HP kosong pada tambah/update, lima variasi kode perintah yang dilarang, nama historis mahasiswa, nama/kategori historis alat, pengembalian setelah edit, edit kosong, dan transaksi baru setelah edit.
+
+Empat belas alur terminal mencakup:
+
+1. Durasi `²`, ditolak lalu `7` diterima.
+2. Durasi berisi 5.000 digit, ditolak tanpa ValueError.
+3. Durasi `0`, ditolak lalu `7` diterima.
+4. Durasi `8`, ditolak lalu `7` diterima.
+5. Durasi kosong, ditolak lalu `7` diterima.
+6. Durasi `abc`, ditolak lalu `7` diterima.
+7. Durasi `01`, ditolak sesuai pilihan menu lalu `7` diterima.
+8. Kondisi salah lalu percobaan ulang dengan angka `1`; transaksi selesai.
+9. Pembatalan saat memilih alat; transaksi tidak dibuat.
+10. Pembatalan saat memilih durasi; transaksi tidak dibuat.
+11. Pembatalan hapus/keluar dan jawaban konfirmasi tidak valid; data tetap ada.
+12. Penolakan kode alat `selesai` melalui menu.
+13. Pengembalian transaksi selesai langsung kembali tanpa meminta alat lagi.
+14. Daftar mahasiswa/alat, pencarian dan riwayat kosong, stok tersedia/dipinjam/rusak, serta statistik tanpa transaksi.
+
+Uji alur terminal dijalankan dengan harness eksternal yang mengirim input ke `main.py`; harness bukan dependency aplikasi. Untuk mengulangi secara manual, tambahkan M1/Andi/0812 dan A1/Kamera/media, kemudian ikuti skenario di atas. Semua proses berakhir normal tanpa traceback. Pengujian ini tidak menggantikan cross-group code review atau pemeriksaan diagram UML.

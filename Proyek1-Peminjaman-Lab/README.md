@@ -72,7 +72,8 @@ Proyek1-Peminjaman-Lab/
 │   ├── peralatan.py
 │   ├── transaksi.py
 │   ├── sistem_lab.py
-│   └── statistik.py
+│   ├── statistik.py
+│   └── tampilan.py
 ├── tests/
 │   ├── __init__.py
 │   ├── test_mahasiswa.py
@@ -80,7 +81,8 @@ Proyek1-Peminjaman-Lab/
 │   ├── test_transaksi.py
 │   ├── test_pengembalian.py
 │   ├── test_skenario_wajib.py
-│   └── test_validasi.py
+│   ├── test_validasi.py
+│   └── test_presentasi_v2.py
 └── dokumentasi/
     ├── uml/
     │   ├── individu/
@@ -111,6 +113,7 @@ python -m tests.test_transaksi
 python -m tests.test_pengembalian
 python -m tests.test_skenario_wajib
 python -m tests.test_validasi
+python -m tests.test_presentasi_v2
 ```
 
 Pengujian dibuat dengan function, `if`, dan `print` tanpa framework tambahan agar tetap sesuai materi praktikum.
@@ -124,3 +127,25 @@ Pengujian dibuat dengan function, `if`, dan `print` tanpa framework tambahan aga
 
 Data hanya disimpan selama program berjalan. Review antarkelompok dan refleksi tetap perlu dilengkapi setelah kegiatan tersebut dilakukan.
 
+
+## PresentasiV2 - Tampilan dan Validasi
+
+Jalankan `python main.py` dari folder `Proyek1-Peminjaman-Lab`. Gunakan terminal dengan lebar minimal 76 kolom agar tabel dan dua kolom menu terlihat rapi. Tidak perlu memasang library tambahan.
+
+- Dashboard menunjukkan jumlah mahasiswa, alat, transaksi aktif, dan kondisi stok.
+- Menu dikelompokkan menjadi data master, transaksi, pemantauan, dan laporan.
+- Daftar mahasiswa dan alat menggunakan tabel. Teks panjang ditampilkan utuh sebagai detail.
+- Pesan `[OK]`, `[!]`, dan `[INFO]` membedakan keberhasilan, penolakan, dan informasi.
+- Hapus data dan keluar program meminta konfirmasi `y/n`; jawaban lain diminta ulang.
+- Peminjaman menampilkan alat tersedia. Ketik `selesai` untuk lanjut atau `batal` untuk membatalkan.
+- Durasi harus salah satu pilihan `1` sampai `7`. Input salah diminta ulang tanpa mengubah stok.
+- Pengembalian menampilkan rincian transaksi dan menerima kondisi `1`/`2`/`3` atau teks kondisi. Ketik `batal` pada kode alat untuk kembali.
+- Nomor HP tidak boleh kosong. Format nomor tidak dibatasi agar tidak menambahkan asumsi di luar soal.
+- Kode `selesai` dan `batal` tidak dapat digunakan sebagai kode alat karena dipakai oleh menu.
+- Riwayat menampilkan nama mahasiswa dan alat saat transaksi dibuat; data master dan statistik tetap menggunakan nama terbaru untuk identitas yang sama.
+
+Perbaikan menggunakan function, string, List/Dictionary, loop, percabangan, atribut objek, serta format f-string. Tidak ada database, framework UI, inheritance tambahan, atau dependency baru.
+
+## Batas Pemeriksaan
+
+56 pemeriksaan modul dan 14 alur menu lulus pada kode PresentasiV2. Hasil ini tidak menjamin bebas dari semua bug. Data tetap hanya hidup selama sesi program. Dokumen review antarkelompok/refleksi harus dilengkapi berdasarkan kegiatan nyata. Diagram UML gambar belum diperbarui untuk atribut riwayat baru; lihat catatan perubahan desain pada `dokumentasi/presentasi_v2.md`.

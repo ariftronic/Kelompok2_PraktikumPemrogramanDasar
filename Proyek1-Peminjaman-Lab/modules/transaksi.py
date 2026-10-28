@@ -11,6 +11,8 @@ from modules.konstanta import (
 class ItemPeminjaman:
     def __init__(self, alat):
         self.alat = alat
+        self.nama_alat_saat_pinjam = alat.nama_alat
+        self.kategori_saat_pinjam = alat.kategori
         self.sudah_dikembalikan = False
         self.tanggal_kembali = None
         self.kondisi_kembali = None
@@ -55,6 +57,7 @@ class TransaksiPeminjaman:
     def __init__(self, id_transaksi, mahasiswa, daftar_alat, tanggal_pinjam, batas_kembali):
         self.id_transaksi = str(id_transaksi).strip()
         self.mahasiswa = mahasiswa
+        self.nama_mahasiswa_saat_pinjam = mahasiswa.nama
         self.daftar_item = []
         self.tanggal_pinjam = tanggal_pinjam
         self.batas_kembali = batas_kembali
@@ -139,7 +142,7 @@ class TransaksiPeminjaman:
 
     def tampilkan_detail(self):
         print(f"ID Transaksi   : {self.id_transaksi}")
-        print(f"Mahasiswa      : {self.mahasiswa.nama} ({self.mahasiswa.nim})")
+        print(f"Mahasiswa      : {self.nama_mahasiswa_saat_pinjam} ({self.mahasiswa.nim})")
         print(f"Tanggal pinjam : {self.tanggal_pinjam}")
         print(f"Batas kembali  : {self.batas_kembali}")
         print(f"Status         : {self.status}")
@@ -163,6 +166,7 @@ class TransaksiPeminjaman:
 
             print(
                 f"  {nomor}. {item.alat.kode_alat} - "
-                f"{item.alat.nama_alat} | {status_item}"
+                f"{item.nama_alat_saat_pinjam} | {status_item}"
             )
             nomor = nomor + 1
+

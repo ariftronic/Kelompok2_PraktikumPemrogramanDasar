@@ -12,7 +12,7 @@ class Mahasiswa:
         nama = str(nama).strip()
         no_hp = str(no_hp).strip()
 
-        if nama == "":
+        if nama == "" or no_hp == "":
             return False
 
         self.nama = nama
@@ -68,3 +68,4 @@ class Mahasiswa:
             print("Status pinjaman : Aktif")
         else:
             print("Status pinjaman : Tidak aktif")
+
