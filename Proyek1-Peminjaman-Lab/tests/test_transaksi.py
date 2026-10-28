@@ -56,25 +56,29 @@ def main():
         not berhasil2,
     )
 
+    sistem.tambah_alat("A003", "Kabel LAN", "jaringan")
     berhasil3, pesan3, trx3 = sistem.buat_transaksi(
         "M001",
-        ["A002", "A002"],
+        ["A003", "A003"],
         7,
         tanggal,
     )
     total = total + 1
     lulus = lulus + cek(
         "Kode alat duplikat ditolak",
-        not berhasil3,
+        not berhasil3
+        and pesan3 == "Kode alat tidak boleh duplikat dalam satu transaksi."
+        and sistem.peralatan["A003"].tersedia,
     )
 
     item = trx.daftar_item[0]
-    item.sudah_dikembalikan = True
-    item.tanggal_kembali = tanggal + timedelta(days=9)
+    berhasil_kembali, pesan_kembali, trx_kembali = sistem.proses_pengembalian(
+        trx.id_transaksi, "A001", "baik", tanggal + timedelta(days=9)
+    )
     total = total + 1
     lulus = lulus + cek(
         "Keterlambatan terdokumentasi",
-        item.jumlah_hari_terlambat(trx.batas_kembali) == 2,
+        berhasil_kembali and item.jumlah_hari_terlambat(trx.batas_kembali) == 2,
     )
 
     print("\nHasil:", lulus, "dari", total, "pengujian lulus.")
@@ -82,3 +86,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

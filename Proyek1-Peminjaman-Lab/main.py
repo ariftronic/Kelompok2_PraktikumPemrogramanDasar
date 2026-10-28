@@ -229,7 +229,7 @@ def proses_pengembalian(sistem):
         print("Kondisi: baik / rusak ringan / rusak berat")
         kondisi = input("Kondisi kembali: ").strip()
 
-        berhasil, pesan, trx = sistem.proses_pengembalian(
+        berhasil, pesan, hasil_trx = sistem.proses_pengembalian(
             id_transaksi,
             kode_alat,
             kondisi,
@@ -320,3 +320,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

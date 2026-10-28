@@ -31,6 +31,11 @@ class SistemLaboratorium:
         if nim in self.mahasiswa:
             return False, "NIM sudah terdaftar."
 
+        # Identitas lama tetap disimpan dalam riwayat transaksi.
+        for trx in self.transaksi.values():
+            if trx.mahasiswa.nim == nim:
+                return False, "NIM sudah digunakan dalam riwayat peminjaman."
+
         self.mahasiswa[nim] = Mahasiswa(nim, nama, no_hp)
         return True, "Mahasiswa berhasil ditambahkan."
 
@@ -97,6 +102,11 @@ class SistemLaboratorium:
 
         if kode_alat in self.peralatan:
             return False, "Kode alat sudah terdaftar."
+
+        for trx in self.transaksi.values():
+            for item in trx.daftar_item:
+                if item.alat.kode_alat == kode_alat:
+                    return False, "Kode alat sudah digunakan dalam riwayat peminjaman."
 
         self.peralatan[kode_alat] = Peralatan(kode_alat, nama_alat, kategori)
         return True, "Peralatan berhasil ditambahkan."
@@ -325,3 +335,4 @@ class SistemLaboratorium:
 
     def riwayat_peminjaman(self, nim):
         return self.cari_transaksi_mahasiswa(nim)
+

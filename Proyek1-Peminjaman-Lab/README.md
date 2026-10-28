@@ -79,7 +79,8 @@ Proyek1-Peminjaman-Lab/
 │   ├── test_peralatan.py
 │   ├── test_transaksi.py
 │   ├── test_pengembalian.py
-│   └── test_skenario_wajib.py
+│   ├── test_skenario_wajib.py
+│   └── test_validasi.py
 └── dokumentasi/
     ├── uml/
     │   ├── individu/
@@ -109,6 +110,17 @@ python -m tests.test_peralatan
 python -m tests.test_transaksi
 python -m tests.test_pengembalian
 python -m tests.test_skenario_wajib
+python -m tests.test_validasi
 ```
 
 Pengujian dibuat dengan function, `if`, dan `print` tanpa framework tambahan agar tetap sesuai materi praktikum.
+
+## Perbaikan untuk Presentasi
+
+- Salah ketik kondisi pengembalian ditolak tanpa menghentikan menu; pengguna dapat mencoba lagi.
+- NIM dan kode alat yang tercatat dalam riwayat tidak dapat didaftarkan ulang setelah dihapus, agar riwayat dan statistik tidak bercampur dengan identitas baru. Ini keputusan desain tambahan, bukan aturan eksplisit pada soal.
+- Pengujian duplikasi memakai alat yang masih tersedia. Pengujian keterlambatan melalui proses pengembalian sistem.
+- Pengujian tambahan menggunakan function, List, perulangan, percabangan, dan print tanpa framework baru.
+
+Data hanya disimpan selama program berjalan. Review antarkelompok dan refleksi tetap perlu dilengkapi setelah kegiatan tersebut dilakukan.
+
